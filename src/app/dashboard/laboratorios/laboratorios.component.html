@@ -1,0 +1,36 @@
+<div class="grid-container">
+  <mat-grid-list cols="5" rowHeight="140px">
+    <mat-grid-tile
+      *ngFor="let card of cards | async"
+      [colspan]="1"
+      [rowspan]="1"
+    >
+      <mat-card
+        class="dashboard-card"
+        [ngStyle]="{'background-color':card.estado === 'on' ? '#90EE90' : '#FF7256' }"
+      >
+        <mat-icon *ngIf="card.estado=='on'">wifi_tethering</mat-icon>
+        <mat-icon *ngIf="card.estado=='off'">wifi_tethering_off</mat-icon>
+        <mat-card-content class="dashboard-card-content">
+          <ngx-gauge
+            [value]="card.value"
+            [size]="size"
+            [type]="gaugeType"
+            Style="top:-30px"
+          >
+            <ngx-gauge-append>
+              Kw/h
+            </ngx-gauge-append>
+            <ngx-gauge-label>
+              {{card.title}}
+            </ngx-gauge-label>
+            <ngx-gauge-prepend></ngx-gauge-prepend>
+            <ngx-gauge-value>
+              {{card.value}}
+            </ngx-gauge-value>
+          </ngx-gauge>
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>

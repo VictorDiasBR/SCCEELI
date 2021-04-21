@@ -1,0 +1,17 @@
+<div
+  class="boxChart__container"
+  [ngClass]="{'boxChart--loading' : loadingData}"
+>
+  <div>
+    <highcharts-chart
+      [Highcharts]="Highcharts"
+      [constructorType]="chartConstructor"
+      [options]="progressTracking"
+      [callbackFunction]="chartCallback"
+      [(update)]="updateFlag"
+      [oneToOne]="oneToOneFlag"
+      style="width: 100%; height: auto; display: block;"
+    >
+    </highcharts-chart>
+  </div>
+</div>

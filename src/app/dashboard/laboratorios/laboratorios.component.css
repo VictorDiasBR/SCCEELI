@@ -1,0 +1,20 @@
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+.grid-container {
+  margin: 0px;
+}
+
+.dashboard-card {
+  position: absolute;
+  height: 100px;
+  width: 180px;
+}
+
+.more-button {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+}
+
+.dashboard-card-content {
+  text-align: center;
+}
