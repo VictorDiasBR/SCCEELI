@@ -1,9 +1,13 @@
 import { Component, OnInit } from "@angular/core";
+import { LabService } from "../../service/lab.service";
+import { LabDataService } from "../../service/lab.data.service";
+import { Lab, Equip, Regra, Simulacao, Log } from "../../service/lab";
+import { Observable } from "rxjs";
 
 import * as Highcharts from "highcharts/highstock";
 import IndicatorsCore from "highcharts/indicators/indicators";
-IndicatorsCore(Highcharts);
 import IndicatorZigZag from "highcharts/indicators/zigzag";
+IndicatorsCore(Highcharts);
 IndicatorZigZag(Highcharts);
 
 @Component({

@@ -1,4 +1,8 @@
 import { Component, OnInit } from "@angular/core";
+import { LabService } from "../../service/lab.service";
+import { LabDataService } from "../../service/lab.data.service";
+import { Lab, Equip, Regra, Simulacao, Log } from "../../service/lab";
+import { Observable } from "rxjs";
 import * as Highcharts from "highcharts";
 import HighchartsMore from "highcharts/highcharts-more";
 import HighchartsExporting from "highcharts/modules/exporting";
