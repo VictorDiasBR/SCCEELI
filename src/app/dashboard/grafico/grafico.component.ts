@@ -3,7 +3,7 @@ import { LabService } from "../../service/lab.service";
 import { LabDataService } from "../../service/lab.data.service";
 import { Lab, Equip, Regra, Simulacao, Log } from "../../service/lab";
 import { Observable } from "rxjs";
-
+import * as moment from "moment";
 import * as Highcharts from "highcharts/highstock";
 import IndicatorsCore from "highcharts/indicators/indicators";
 import IndicatorZigZag from "highcharts/indicators/zigzag";
@@ -15,8 +15,50 @@ IndicatorZigZag(Highcharts);
   templateUrl: "./grafico.component.html",
   styleUrls: ["./grafico.component.css"]
 })
-export class GraficoComponent {
+export class GraficoComponent implements OnInit {
   Highcharts = Highcharts;
+
+  datatime = "22/04/2021 20:08:52";
+  labs: Observable<any>;
+  simulacoes: Observable<any>;
+
+  dados: Observable<any>;
+
+  constructor(
+    private labService: LabService,
+    private labDataService: LabDataService
+  ) {
+    this.labs = this.labService.getAll();
+    this.simulacoes = this.labService.getAllSimulacoes();
+    this.simulacoes.forEach((element) => {
+      element.forEach((s) => {
+        if (s.estadoSimulacao === true) {
+          for (const lab of s.snapshotLabs) {
+            if (lab.estado === "on") {
+              for (const equip of lab.equips) {
+                if (equip.dateTimeOn !== "*") {
+                  /* var date1 = new Date(
+                    equip.dateTimeOn.slice(0, 4),
+                    equip.dateTimeOn.slice(4, 6),
+                    equip.dateTimeOn.slice(6, 8),
+                    equip.dateTimeOn.slice(9, 11),
+                    equip.dateTimeOn.slice(12, 14)
+                  );
+                  var date2 = new Date().getTime();
+                  var diffMs = date2 - date1;
+                  console.log(diffMs);
+                  var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
+                  */
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+  }
+
+  ngOnInit() {}
 
   chartOptions = {
     rangeSelector: {
@@ -43,8 +85,17 @@ export class GraficoComponent {
         id: "aapl",
         name: "AAPL Stock Price",
         data: [
-          [1528983000000, 191.55, 191.57, 190.22, 190.8],
-          [1529069400000, 190.03, 190.16, 188.26, 188.84],
+          [
+            Date.parse(
+              moment(this.datatime, "DD/MM/YYYY HH:mm:ss", true).format(
+                "YYYY-MM-DD HH:mm:ss"
+              )
+            ),
+            190.03,
+            190.16,
+            188.26,
+            188.84
+          ],
           [1529328600000, 187.88, 189.22, 187.2, 188.74],
           [1529415000000, 185.14, 186.33, 183.45, 185.69],
           [1529501400000, 186.35, 187.2, 185.73, 186.5],
