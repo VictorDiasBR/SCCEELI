@@ -5,31 +5,35 @@ import { Lab, Equip, Regra, Simulacao, Log } from "../../service/lab";
 import { Observable } from "rxjs";
 import * as moment from "moment";
 import * as Highcharts from "highcharts/highstock";
-import IndicatorsCore from "highcharts/indicators/indicators";
-import IndicatorZigZag from "highcharts/indicators/zigzag";
-IndicatorsCore(Highcharts);
-IndicatorZigZag(Highcharts);
-
 @Component({
   selector: "app-grafico",
   templateUrl: "./grafico.component.html",
   styleUrls: ["./grafico.component.css"]
 })
 export class GraficoComponent implements OnInit {
-  Highcharts = Highcharts;
-
   datatime = "22/04/2021 20:08:52";
   labs: Observable<any>;
   simulacoes: Observable<any>;
 
   dados: Observable<any>;
+  Highcharts = Highcharts;
+  chartOptions: any;
 
+  pc: number[][] = [];
+  arCondicionado: number[][] = [];
+  projetor: number[][] = [];
+  lampada: number[][] = [];
+  bandeira = 0.5;
   constructor(
     private labService: LabService,
     private labDataService: LabDataService
   ) {
     this.labs = this.labService.getAll();
     this.simulacoes = this.labService.getAllSimulacoes();
+
+    var equipsTempoResto = [];
+    var equipsTempo = [];
+
     this.simulacoes.forEach((element) => {
       element.forEach((s) => {
         if (s.estadoSimulacao === true) {
@@ -37,155 +41,216 @@ export class GraficoComponent implements OnInit {
             if (lab.estado === "on") {
               for (const equip of lab.equips) {
                 if (equip.dateTimeOn !== "*") {
-                  /* var date1 = new Date(
-                    equip.dateTimeOn.slice(0, 4),
-                    equip.dateTimeOn.slice(4, 6),
-                    equip.dateTimeOn.slice(6, 8),
-                    equip.dateTimeOn.slice(9, 11),
-                    equip.dateTimeOn.slice(12, 14)
+                  var date1 = Math.floor(
+                    new Date(
+                      equip.dateTimeOn.slice(6, 10),
+                      equip.dateTimeOn.slice(3, 5),
+                      equip.dateTimeOn.slice(0, 2),
+                      equip.dateTimeOn.slice(11, 13),
+                      equip.dateTimeOn.slice(14, 16),
+                      equip.dateTimeOn.slice(17, 19)
+                    ).getTime() / 60000
                   );
-                  var date2 = new Date().getTime();
-                  var diffMs = date2 - date1;
-                  console.log(diffMs);
-                  var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
-                  */
+
+                  var date2 = Math.floor(
+                    new Date(
+                      equip.dateTimeOn.slice(6, 10),
+                      equip.dateTimeOn.slice(3, 5),
+                      equip.dateTimeOn.slice(0, 2),
+                      22
+                    ).getTime() / 60000
+                  );
+
+                  var diffMs = Number((date2 - date1).toFixed());
+                  var aux = {
+                    labNome: lab.nome,
+                    equip: equip,
+                    min: diffMs
+                  };
+
+                  equipsTempoResto.push(aux);
                 }
               }
             }
           }
+
+          for (const log of s.log) {
+            if (log.dateTimeOn) {
+              var dateInicio = Math.floor(
+                new Date(
+                  log.dateTimeOn.slice(6, 10),
+                  log.dateTimeOn.slice(3, 5),
+                  log.dateTimeOn.slice(0, 2),
+                  log.dateTimeOn.slice(11, 13),
+                  log.dateTimeOn.slice(14, 16),
+                  log.dateTimeOn.slice(17, 19)
+                ).getTime() / 60000
+              );
+              var dateFim = Math.floor(
+                new Date(
+                  log.dateTimeOff.slice(6, 10),
+                  log.dateTimeOff.slice(3, 5),
+                  log.dateTimeOff.slice(0, 2),
+                  log.dateTimeOff.slice(11, 13),
+                  log.dateTimeOff.slice(14, 16),
+                  log.dateTimeOff.slice(17, 19)
+                ).getTime() / 60000
+              );
+
+              var min = Number((dateFim - dateInicio).toFixed());
+
+              var aux2 = {
+                labNome: log.labNome,
+                equip: log.equipamento,
+                min: min
+              };
+
+              equipsTempo.push(aux2);
+            }
+          }
+
+          for (const l1 of equipsTempoResto) {
+            for (const l2 of equipsTempo) {
+              if (l1.labNome === l2.labNome && l1.equip.id === l2.equip.id) {
+                l1.min += l2.min;
+              }
+            }
+          }
+
+          var datas = [];
+          for (const e of equipsTempo) {
+            datas.push(e.equip.dateTimeOn.slice(0, 10));
+          }
+          var datasFiltro = [];
+          for (const data of datas) {
+            var duplicated =
+              datasFiltro.findIndex((redItem) => {
+                return data === redItem;
+              }) > -1;
+
+            if (!duplicated) {
+              datasFiltro.push(data);
+            }
+          }
+          console.log(datasFiltro);
+          var custoTotalPc: number;
+          var custoTotalAr: number;
+          var custoTotalPro: number;
+          var custoTotalLam: number;
+          for (const data of datasFiltro) {
+            custoTotalPc = 0;
+            custoTotalAr = 0;
+            custoTotalPro = 0;
+            custoTotalLam = 0;
+            for (const e of equipsTempoResto) {
+              if (
+                data === e.equip.dateTimeOn.slice(0, 10) &&
+                e.equip.nome === "computador"
+              ) {
+                var temp = e.min / 60;
+                var kw = e.equip.potencia / 1000;
+                var energia = kw * temp;
+                var valor = this.bandeira * energia;
+
+                custoTotalPc = Number((custoTotalPc + valor).toFixed(2));
+              } else if (
+                data === e.equip.dateTimeOn.slice(0, 10) &&
+                e.equip.nome === "Ar Condicionado"
+              ) {
+                var temp2 = e.min / 60;
+                var kw2 = e.equip.potencia / 1000;
+                var energia2 = kw2 * temp2;
+                var valor2 = this.bandeira * energia2;
+
+                custoTotalAr = Number((custoTotalAr + valor2).toFixed(2));
+              } else if (
+                data === e.equip.dateTimeOn.slice(0, 10) &&
+                e.equip.nome === "projetor"
+              ) {
+                var temp3 = e.min / 60;
+                var kw3 = e.equip.potencia / 1000;
+                var energia3 = kw3 * temp3;
+                var valor3 = this.bandeira * energia3;
+
+                custoTotalPro = Number((custoTotalPro + valor3).toFixed(2));
+              } else if (
+                data === e.equip.dateTimeOn.slice(0, 10) &&
+                e.equip.nome === "lampada"
+              ) {
+                var temp4 = e.min / 60;
+                var kw4 = e.equip.potencia / 1000;
+                var energia4 = kw4 * temp4;
+                var valor4 = this.bandeira * energia4;
+
+                custoTotalLam = Number((custoTotalLam + valor4).toFixed(2));
+              }
+            }
+            this.pc.push([
+              Date.parse(moment(data, "DD/MM/YYYY", true).format("YYYY-MM-DD")),
+              custoTotalPc
+            ]);
+            this.projetor.push([
+              Date.parse(moment(data, "DD/MM/YYYY", true).format("YYYY-MM-DD")),
+              custoTotalPro
+            ]);
+            this.lampada.push([
+              Date.parse(moment(data, "DD/MM/YYYY", true).format("YYYY-MM-DD")),
+              custoTotalLam
+            ]);
+            this.arCondicionado.push([
+              Date.parse(moment(data, "DD/MM/YYYY", true).format("YYYY-MM-DD")),
+              custoTotalAr
+            ]);
+          }
+          this.updateGrafico(
+            this.pc,
+            this.arCondicionado,
+            this.projetor,
+            this.lampada
+          );
         }
       });
     });
   }
-
+  data = [
+    [1484058600000, 118.77],
+    [1484068600000, 150.97]
+  ];
   ngOnInit() {}
 
-  chartOptions = {
-    rangeSelector: {
-      selected: 2
-    },
-
-    title: {
-      text: "AAPL Stock Price"
-    },
-
-    legend: {
-      enabled: true
-    },
-
-    plotOptions: {
-      series: {
-        showInLegend: true
-      }
-    },
-
-    series: [
-      {
-        type: "ohlc",
-        id: "aapl",
-        name: "AAPL Stock Price",
-        data: [
-          [
-            Date.parse(
-              moment(this.datatime, "DD/MM/YYYY HH:mm:ss", true).format(
-                "YYYY-MM-DD HH:mm:ss"
-              )
-            ),
-            190.03,
-            190.16,
-            188.26,
-            188.84
-          ],
-          [1529328600000, 187.88, 189.22, 187.2, 188.74],
-          [1529415000000, 185.14, 186.33, 183.45, 185.69],
-          [1529501400000, 186.35, 187.2, 185.73, 186.5],
-          [1529587800000, 187.25, 188.35, 184.94, 185.46],
-          [1529674200000, 186.12, 186.15, 184.7, 184.92],
-          [1529933400000, 183.4, 184.92, 180.73, 182.17],
-          [1530019800000, 182.99, 186.53, 182.54, 184.43],
-          [1530106200000, 185.23, 187.28, 184.03, 184.16],
-          [1530192600000, 184.1, 186.21, 183.8, 185.5],
-          [1530279000000, 186.29, 187.19, 182.91, 185.11],
-          [1530538200000, 183.82, 187.3, 183.42, 187.18],
-          [1530624600000, 187.79, 187.95, 183.54, 183.92],
-          [1530797400000, 185.26, 186.41, 184.28, 185.4],
-          [1530883800000, 185.42, 188.43, 185.2, 187.97],
-          [1531143000000, 189.5, 190.68, 189.3, 190.58],
-          [1531229400000, 190.71, 191.28, 190.18, 190.35],
-          [1531315800000, 188.5, 189.78, 187.61, 187.88],
-          [1531402200000, 189.53, 191.41, 189.31, 191.03],
-          [1531488600000, 191.08, 191.84, 190.9, 191.33],
-          [1531747800000, 191.52, 192.65, 190.42, 190.91],
-          [1531834200000, 189.75, 191.87, 189.2, 191.45],
-          [1531920600000, 191.78, 191.8, 189.93, 190.4],
-          [1532007000000, 189.69, 192.55, 189.69, 191.88],
-          [1532093400000, 191.78, 192.43, 190.17, 191.44],
-          [1532352600000, 190.68, 191.96, 189.56, 191.61],
-          [1532439000000, 192.45, 193.66, 192.05, 193],
-          [1532525400000, 193.06, 194.85, 192.43, 194.82],
-          [1532611800000, 194.61, 195.96, 193.61, 194.21],
-          [1532698200000, 194.99, 195.19, 190.1, 190.98],
-          [1532957400000, 191.9, 192.2, 189.07, 189.91],
-          [1533043800000, 190.3, 192.14, 189.34, 190.29],
-          [1533130200000, 199.13, 201.76, 197.31, 201.5],
-          [1533216600000, 200.58, 208.38, 200.35, 207.39],
-          [1533303000000, 207.03, 208.74, 205.48, 207.99],
-          [1533562200000, 208, 209.25, 207.07, 209.07],
-          [1533648600000, 209.32, 209.5, 206.76, 207.11],
-          [1533735000000, 206.05, 207.81, 204.52, 207.25],
-          [1533821400000, 209.53, 209.78, 207.2, 208.88],
-          [1533907800000, 207.36, 209.1, 206.67, 207.53],
-          [1534167000000, 209.31, 210.95, 207.7, 208.87],
-          [1534253400000, 210.16, 210.56, 208.26, 209.75],
-          [1534339800000, 209.22, 210.74, 208.33, 210.24],
-          [1534426200000, 211.75, 213.81, 211.47, 213.32],
-          [1534512600000, 213.44, 217.95, 213.16, 217.58],
-          [1534771800000, 218.1, 219.18, 215.11, 215.46],
-          [1534858200000, 216.8, 217.19, 214.03, 215.04],
-          [1534944600000, 214.1, 216.36, 213.84, 215.05],
-          [1535031000000, 214.65, 217.05, 214.6, 215.49],
-          [1535117400000, 216.6, 216.9, 215.11, 216.16],
-          [1535376600000, 217.15, 218.74, 216.33, 217.94],
-          [1535463000000, 219.01, 220.54, 218.92, 219.7],
-          [1535549400000, 220.15, 223.49, 219.41, 222.98],
-          [1535635800000, 223.25, 228.26, 222.4, 225.03],
-          [1535722200000, 226.51, 228.87, 226, 227.63],
-          [1536067800000, 228.41, 229.18, 226.63, 228.36],
-          [1536154200000, 228.99, 229.67, 225.1, 226.87],
-          [1536240600000, 226.23, 227.35, 221.3, 223.1],
-          [1536327000000, 221.85, 225.37, 220.71, 221.3],
-          [1536586200000, 220.95, 221.85, 216.47, 218.33],
-          [1536672600000, 218.01, 224.3, 216.56, 223.85],
-          [1536759000000, 224.94, 225, 219.84, 221.07],
-          [1536845400000, 223.52, 228.35, 222.57, 226.41],
-          [1536931800000, 225.75, 226.84, 222.52, 223.84],
-          [1537191000000, 222.15, 222.95, 217.27, 217.88],
-          [1537277400000, 217.79, 221.85, 217.12, 218.24],
-          [1537363800000, 218.5, 219.62, 215.3, 218.37],
-          [1537450200000, 220.24, 222.28, 219.15, 220.03],
-          [1537536600000, 220.78, 221.36, 217.29, 217.66],
-          [1537795800000, 216.82, 221.26, 216.63, 220.79],
-          [1537882200000, 219.75, 222.82, 219.7, 222.19],
-          [1537968600000, 221, 223.75, 219.76, 220.42],
-          [1538055000000, 223.82, 226.44, 223.54, 224.95],
-          [1538141400000, 224.79, 225.84, 224.02, 225.74],
-          [1538400600000, 227.95, 229.42, 226.35, 227.26],
-          [1538487000000, 227.25, 230, 226.63, 229.28],
-          [1538573400000, 230.05, 233.47, 229.78, 232.07],
-          [1538662700000, 230.78, 232.33, 229.07, 230.15]
-        ]
+  updateGrafico(
+    pc: number[][],
+    ar: number[][],
+    pro: number[][],
+    lam: number[][]
+  ) {
+    this.chartOptions = {
+      rangeSelector: {
+        selected: 1
       },
-      {
-        type: "zigzag",
-        linkedTo: "aapl"
+
+      title: {
+        text: "AAPL Stock Price"
       },
-      {
-        type: "zigzag",
-        linkedTo: "aapl",
-        params: {
-          deviation: 5
+
+      series: [
+        {
+          name: "Computador",
+          data: pc
+        },
+        {
+          name: "Ar Condicionado",
+          data: ar
+        },
+        {
+          name: "Projetor",
+          data: pro
+        },
+        {
+          name: "Lâmpada",
+          data: lam
         }
-      }
-    ]
-  };
+      ]
+    };
+  }
 }

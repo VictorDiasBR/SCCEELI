@@ -1,5 +1,6 @@
 <highcharts-chart
-  style="width: 100%; display: block; height: 100%;"
+  *ngIf="chartOptions"
+  style="width: 100%; display: block;"
   [Highcharts]="Highcharts"
   [constructorType]="'stockChart'"
   [options]="chartOptions"
