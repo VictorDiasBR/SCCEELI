@@ -31,10 +31,13 @@ export class GraficoComponent implements OnInit {
     this.labs = this.labService.getAll();
     this.simulacoes = this.labService.getAllSimulacoes();
 
-    var equipsTempoResto = [];
-    var equipsTempo = [];
-
     this.simulacoes.forEach((element) => {
+      var equipsTempoResto = [];
+      var equipsTempo = [];
+      this.pc = [];
+      this.arCondicionado = [];
+      this.projetor = [];
+      this.lampada = [];
       element.forEach((s) => {
         if (s.estadoSimulacao === true) {
           for (const equip of s.snapshotLabs) {
@@ -120,7 +123,7 @@ export class GraficoComponent implements OnInit {
               }
             }
           }
-          console.log(equipsTempoResto);
+
           var datas = [];
           for (const e of equipsTempo) {
             datas.push(e.equip.dateTimeOn.slice(0, 10));
@@ -136,7 +139,7 @@ export class GraficoComponent implements OnInit {
               datasFiltro.push(data);
             }
           }
-          console.log(datasFiltro);
+
           var custoTotalPc: number;
           var custoTotalAr: number;
           var custoTotalPro: number;
@@ -230,14 +233,13 @@ export class GraficoComponent implements OnInit {
     pro: number[][],
     lam: number[][]
   ) {
-    console.log(ar)
     this.chartOptions = {
       rangeSelector: {
         selected: 1
       },
 
       title: {
-        text: "AAPL Stock Price"
+        text: "Gastos com Equipamentos(R$)"
       },
 
       series: [
