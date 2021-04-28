@@ -127,6 +127,7 @@ export class GraficoComponent implements OnInit {
           var datas = [];
           for (const e of equipsTempo) {
             datas.push(e.equip.dateTimeOn.slice(0, 10));
+            datas.push(e.equip.dateTimeOff.slice(0, 10));
           }
           var datasFiltro = [];
           for (const data of datas) {

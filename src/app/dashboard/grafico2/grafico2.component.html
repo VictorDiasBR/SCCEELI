@@ -1,9 +1,11 @@
 <div
   class="boxChart__container"
   [ngClass]="{'boxChart--loading' : loadingData}"
+  *ngIf="progressTracking"
 >
   <div>
     <highcharts-chart
+      *ngIf="Highcharts"
       [Highcharts]="Highcharts"
       [constructorType]="chartConstructor"
       [options]="progressTracking"
