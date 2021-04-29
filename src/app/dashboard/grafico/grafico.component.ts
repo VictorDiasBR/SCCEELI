@@ -222,10 +222,6 @@ export class GraficoComponent implements OnInit {
       });
     });
   }
-  data = [
-    [1484058600000, 118.77],
-    [1484068600000, 150.97]
-  ];
   ngOnInit() {}
 
   updateGrafico(
