@@ -67,6 +67,7 @@ export class GraficoComponent implements OnInit {
                 var aux = {
                   labNome: equip.nomeLab,
                   equip: equip,
+                  equipDateOn: data,
                   min: diffMs
                 };
 
@@ -111,15 +112,13 @@ export class GraficoComponent implements OnInit {
           }
 
           for (const l1 of equipsTempoResto) {
-            for (const l11 of l1.equip.equipDateOn) {
-              for (const l2 of equipsTempo) {
-                if (
-                  l1.labNome === l2.labNome &&
-                  l1.equip.equip.id === l2.equip.equipamento.id &&
-                  l11.slice(0, 10) === l2.equip.dateTimeOn.slice(0, 10)
-                ) {
-                  l1.min += l2.min;
-                }
+            for (const l2 of equipsTempo) {
+              if (
+                l1.labNome === l2.labNome &&
+                l1.equip.equip.id === l2.equip.equipamento.id &&
+                l1.equipDateOn.slice(0, 10) === l2.equip.dateTimeOn.slice(0, 10)
+              ) {
+                l1.min += l2.min;
               }
             }
           }
@@ -151,48 +150,46 @@ export class GraficoComponent implements OnInit {
             custoTotalPro = 0;
             custoTotalLam = 0;
             for (const e of equipsTempoResto) {
-              for (const vetor of e.equip.equipDateOn) {
-                if (
-                  data === vetor.slice(0, 10) &&
-                  e.equip.equip.nome === "computador"
-                ) {
-                  var temp = e.min / 60;
-                  var kw = e.equip.equip.potencia / 1000;
-                  var energia = kw * temp;
-                  var valor = this.bandeira * energia;
+              if (
+                data === e.equipDateOn.slice(0, 10) &&
+                e.equip.equip.nome === "computador"
+              ) {
+                var temp = e.min / 60;
+                var kw = e.equip.equip.potencia / 1000;
+                var energia = kw * temp;
+                var valor = this.bandeira * energia;
 
-                  custoTotalPc = Number((custoTotalPc + valor).toFixed(2));
-                } else if (
-                  data === vetor.slice(0, 10) &&
-                  e.equip.equip.nome === "Ar Condicionado"
-                ) {
-                  var temp2 = e.min / 60;
-                  var kw2 = e.equip.equip.potencia / 1000;
-                  var energia2 = kw2 * temp2;
-                  var valor2 = this.bandeira * energia2;
+                custoTotalPc = Number((custoTotalPc + valor).toFixed(2));
+              } else if (
+                data === e.equipDateOn.slice(0, 10) &&
+                e.equip.equip.nome === "Ar Condicionado"
+              ) {
+                var temp2 = e.min / 60;
+                var kw2 = e.equip.equip.potencia / 1000;
+                var energia2 = kw2 * temp2;
+                var valor2 = this.bandeira * energia2;
 
-                  custoTotalAr = Number((custoTotalAr + valor2).toFixed(2));
-                } else if (
-                  data === vetor.slice(0, 10) &&
-                  e.equip.equip.nome === "projetor"
-                ) {
-                  var temp3 = e.min / 60;
-                  var kw3 = e.equip.equip.potencia / 1000;
-                  var energia3 = kw3 * temp3;
-                  var valor3 = this.bandeira * energia3;
+                custoTotalAr = Number((custoTotalAr + valor2).toFixed(2));
+              } else if (
+                data === e.equipDateOn.slice(0, 10) &&
+                e.equip.equip.nome === "projetor"
+              ) {
+                var temp3 = e.min / 60;
+                var kw3 = e.equip.equip.potencia / 1000;
+                var energia3 = kw3 * temp3;
+                var valor3 = this.bandeira * energia3;
 
-                  custoTotalPro = Number((custoTotalPro + valor3).toFixed(2));
-                } else if (
-                  data === vetor.slice(0, 10) &&
-                  e.equip.equip.nome === "lampada"
-                ) {
-                  var temp4 = e.min / 60;
-                  var kw4 = e.equip.equip.potencia / 1000;
-                  var energia4 = kw4 * temp4;
-                  var valor4 = this.bandeira * energia4;
+                custoTotalPro = Number((custoTotalPro + valor3).toFixed(2));
+              } else if (
+                data === e.equipDateOn.slice(0, 10) &&
+                e.equip.equip.nome === "lampada"
+              ) {
+                var temp4 = e.min / 60;
+                var kw4 = e.equip.equip.potencia / 1000;
+                var energia4 = kw4 * temp4;
+                var valor4 = this.bandeira * energia4;
 
-                  custoTotalLam = Number((custoTotalLam + valor4).toFixed(2));
-                }
+                custoTotalLam = Number((custoTotalLam + valor4).toFixed(2));
               }
             }
             this.pc.push([
@@ -212,6 +209,7 @@ export class GraficoComponent implements OnInit {
               custoTotalAr
             ]);
           }
+
           this.updateGrafico(
             this.pc,
             this.arCondicionado,

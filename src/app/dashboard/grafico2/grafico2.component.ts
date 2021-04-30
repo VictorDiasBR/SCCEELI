@@ -83,6 +83,7 @@ export class Grafico2Component implements OnInit {
                 var aux = {
                   labNome: equip.nomeLab,
                   equip: equip,
+                  equipDateOn:data,
                   min: diffMs
                 };
 
@@ -126,18 +127,17 @@ export class Grafico2Component implements OnInit {
             }
           }
 
-          for (const l1 of equipsTempoResto) {
-            for (const l11 of l1.equip.equipDateOn) {
+          for (const l1 of equipsTempoResto) { 
               for (const l2 of equipsTempo) {
                 if (
                   l1.labNome === l2.labNome &&
                   l1.equip.equip.id === l2.equip.equipamento.id &&
-                  l11.slice(0, 10) === l2.equip.dateTimeOn.slice(0, 10)
+                  l1.equipDateOn.slice(0, 10) === l2.equip.dateTimeOn.slice(0, 10)
                 ) {
                   l1.min += l2.min;
                 }
               }
-            }
+            
           }
 
           var datas = [];
@@ -163,9 +163,9 @@ export class Grafico2Component implements OnInit {
             custoTotalPro = 0;
             custoTotalLam = 0;
             for (const e of equipsTempoResto) {
-              for (const vetor of e.equip.equipDateOn) {
+              
                 if (
-                  data === vetor.slice(0, 10) &&
+                  data === e.equipDateOn.slice(0, 10) &&
                   e.equip.equip.nome === "computador"
                 ) {
                   var temp = e.min / 60;
@@ -175,7 +175,7 @@ export class Grafico2Component implements OnInit {
 
                   custoTotalPc = Number((custoTotalPc + valor).toFixed(2));
                 } else if (
-                  data === vetor.slice(0, 10) &&
+                  data === e.equipDateOn.slice(0, 10) &&
                   e.equip.equip.nome === "Ar Condicionado"
                 ) {
                   var temp2 = e.min / 60;
@@ -185,7 +185,7 @@ export class Grafico2Component implements OnInit {
 
                   custoTotalAr = Number((custoTotalAr + valor2).toFixed(2));
                 } else if (
-                  data === vetor.slice(0, 10) &&
+                  data === e.equipDateOn.slice(0, 10) &&
                   e.equip.equip.nome === "projetor"
                 ) {
                   var temp3 = e.min / 60;
@@ -195,7 +195,7 @@ export class Grafico2Component implements OnInit {
 
                   custoTotalPro = Number((custoTotalPro + valor3).toFixed(2));
                 } else if (
-                  data === vetor.slice(0, 10) &&
+                  data === e.equipDateOn.slice(0, 10) &&
                   e.equip.equip.nome === "lampada"
                 ) {
                   var temp4 = e.min / 60;
@@ -205,7 +205,7 @@ export class Grafico2Component implements OnInit {
 
                   custoTotalLam = Number((custoTotalLam + valor4).toFixed(2));
                 }
-              }
+              
             }
             this.pc.push([data, custoTotalPc]);
             this.projetor.push([data, custoTotalPro]);
