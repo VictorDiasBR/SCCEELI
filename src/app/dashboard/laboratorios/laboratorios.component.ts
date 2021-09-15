@@ -36,19 +36,7 @@ export class LaboratoriosComponent implements OnInit, AfterViewInit {
     private labDataService: LabDataService
   ) {
     this.labs = this.labService.getAll();
-    this.labs.forEach((element) => {
-      this.listaGastos = [];
-      element.forEach((lab) => {
-        var gasto = lab.consumo * 0.62;
-
-        var x: ConsumoConverter = {
-          labKey: lab.key,
-          valor: Number(gasto.toFixed(2))
-        };
-
-        this.listaGastos.push(x);
-      });
-    });
+   
     this.simulacoes = this.labService.getAll();
   }
 
