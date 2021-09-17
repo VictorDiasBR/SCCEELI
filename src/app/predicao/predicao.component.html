@@ -1,0 +1,63 @@
+<mat-grid-list cols="2" rowHeight="2:1.2">
+  <mat-grid-tile>
+    <mat-card>
+      <form class="example-form">
+        <mat-form-field class="example-full-width" appearance="fill">
+          <mat-label>Título da predição</mat-label>
+          <input matInput placeholder="Ex. Pizza" value="Sushi" />
+        </mat-form-field>
+
+        <mat-form-field class="example-form-field" appearance="fill">
+          <mat-label>First campaign</mat-label>
+          <mat-date-range-input
+            [formGroup]="campaignOne"
+            [rangePicker]="campaignOnePicker"
+            [comparisonStart]="campaignTwo.value.start"
+            [comparisonEnd]="campaignTwo.value.end"
+          >
+            <input
+              matStartDate
+              placeholder="Start date"
+              formControlName="start"
+            />
+            <input matEndDate placeholder="End date" formControlName="end" />
+          </mat-date-range-input>
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="campaignOnePicker"
+          ></mat-datepicker-toggle>
+          <mat-date-range-picker #campaignOnePicker></mat-date-range-picker>
+        </mat-form-field>
+        <div class="example-full-width" appearance="fill">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="executarPredicao()"
+          >
+            Executar
+          </button>
+
+          <button
+            style="margin-left: 5%;"
+            mat-raised-button
+            color="primary"
+            (click)="openDialog()"
+          >
+            Adicionar Múltiplos períodos
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <mat-card>
+      Gráfico...
+    </mat-card>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <mat-card> tabela... </mat-card>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <mat-card> Gráfico... </mat-card>
+  </mat-grid-tile>
+</mat-grid-list>
