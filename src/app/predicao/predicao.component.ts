@@ -6,6 +6,17 @@ import {
   MAT_DIALOG_DATA
 } from "@angular/material/dialog";
 import * as Highcharts from "highcharts/highstock";
+import { LabService } from "../service/lab.service";
+import { LabDataService } from "../service/lab.data.service";
+import {
+  Lab,
+  Equip,
+  Regra,
+  Simulacao,
+  Log,
+  ConsumoConverter
+} from "../service/lab";
+import { Observable } from "rxjs";
 declare var require: any;
 const IndicatorsCore = require("highcharts/indicators/indicators");
 IndicatorsCore(Highcharts);
@@ -34,15 +45,11 @@ export class PredicaoComponent implements OnInit {
 
   Highcharts = Highcharts;
 
+  labs: Observable<any>;
+  simulacoes: Observable<any>;
+
   displayedColumns: string[] = ["item", "cost"];
-  transactions: Transaction[] = [
-    { item: "Beach ball", cost: 4 },
-    { item: "Towel", cost: 5 },
-    { item: "Frisbee", cost: 2 },
-    { item: "Sunscreen", cost: 4 },
-    { item: "Cooler", cost: 25 },
-    { item: "Swim suit", cost: 15 }
-  ];
+  transactions: Transaction[] = [];
 
   pieChartOptions = {
     chart: {
@@ -252,10 +259,18 @@ export class PredicaoComponent implements OnInit {
       .map((t) => t.cost)
       .reduce((acc, value) => acc + value, 0);
   }
-  constructor(public dialog: MatDialog) {
+  constructor(
+    public dialog: MatDialog,
+    private labService: LabService,
+    private labDataService: LabDataService
+  ) {
     const today = new Date();
     const month = today.getMonth();
     const year = today.getFullYear();
+
+    this.labs = this.labService.getAll();
+
+    this.simulacoes = this.labService.getAll();
 
     this.campaignOne = new FormGroup({
       start: new FormControl(new Date(year, month, 13)),
@@ -282,8 +297,40 @@ export class PredicaoComponent implements OnInit {
 
   executarPredicao() {
     console.log(this.name);
-    console.log(this.campaignOne.value.start);
-    console.log(this.campaignOne.value.end);
+
+    var dataInicio = this.campaignOne.value.start.toLocaleDateString("pt-BR", {
+      timeZone: "UTC"
+    });
+    var dataFim = this.campaignOne.value.end.toLocaleDateString("pt-BR", {
+      timeZone: "UTC"
+    });
+    console.log(dataInicio);
+    console.log(dataFim);
+
+    this.transactions = [{ item: dataInicio + " -> " + dataFim, cost: 50 }];
+    var dateInicio = Math.floor(
+      new Date(
+        dataInicio.slice(6, 10),
+        dataInicio.slice(3, 5),
+        dataInicio.slice(0, 2)
+      ).getTime() / 60000
+    );
+    var dateFim = Math.floor(
+      new Date(
+        dataFim.slice(6, 10),
+        dataFim.slice(3, 5),
+        dataFim.slice(0, 2)
+      ).getTime() / 60000
+    );
+    var min = Number((dateFim - dateInicio).toFixed());
+
+    var temp = min / 60;
+    var kw = 100 / 1000;
+    var energia = kw * temp;
+    var valor = 0.3 * energia;
+
+    this.transactions = [{ item: dataInicio + " -> " + dataFim, cost: valor }];
+    console.log(min);
   }
 
   chartOptions = [
