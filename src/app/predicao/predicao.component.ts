@@ -62,10 +62,10 @@ export class PredicaoComponent implements OnInit {
       enabled: false
     },
     title: {
-      text: "Título Pie"
+      text: "Gasto por equipamento"
     },
     subtitle: {
-      text: "Subtítulo Pie"
+      text: "Resultado da predição"
     },
     tooltip: {
       pointFormat: "<b>{point.percentage}%</b>",
@@ -90,17 +90,15 @@ export class PredicaoComponent implements OnInit {
         type: "pie",
         name: "",
         data: [
-          ["Série 1", 45.0],
-          ["Série 2", 26.8],
+          ["Lâmpadas", 45.0],
+          ["Projetores", 26.8],
           {
-            name: "Série 3",
+            name: "Computadores",
             y: 12.8,
             sliced: true,
             selected: true
           },
-          ["Série 4", 8.5],
-          ["Série 5", 6.2],
-          ["Série 6", 0.7]
+          ["Ár condicionados", 8.5]
         ]
       }
     ]
@@ -330,6 +328,51 @@ export class PredicaoComponent implements OnInit {
     var valor = 0.3 * energia;
 
     this.transactions = [{ item: dataInicio + " -> " + dataFim, cost: valor }];
+
+    var totalPc = 0;
+    var totalAr = 0;
+    var totalPr = 0;
+    var totalLa = 0;
+
+    this.labs.forEach((element) => {
+      element.forEach((lab) => {
+        for (const i of lab.equips) {
+          if (i.tipo === "a") {
+            totalAr += i.potencia;
+          } else if (i.tipo === "c") {
+            totalPc += i.potencia;
+          } else if (i.tipo === "p") {
+            totalPr += i.potencia;
+          } else if (i.tipo === "l") {
+            totalLa += i.potencia;
+          }
+        }
+      });
+    });
+    var tempTotal = min / 60;
+
+    //total
+    var kwTotal = (totalPc + totalAr + totalLa + totalPr) / 1000;
+    var energiaTotal = kwTotal * tempTotal;
+    var valorTotal = 0.3 * energiaTotal;
+
+    // por equipamento
+    var kwPc = totalPc / 1000;
+    var energiaPc = kwPc * tempTotal;
+    var valorPc = 0.3 * energiaPc;
+
+    var kwPr = totalPr / 1000;
+    var energiaPr = kwPr * tempTotal;
+    var valorPr = 0.3 * energiaPr;
+
+    var kwLa = totalLa / 1000;
+    var energiaLa = kwLa * tempTotal;
+    var valorLa = 0.3 * energiaLa;
+
+    var kwAr = totalAr / 1000;
+    var energiaAr = kwAr * tempTotal;
+    var valorLa = 0.3 * energiaAr;
+
     console.log(min);
   }
 
