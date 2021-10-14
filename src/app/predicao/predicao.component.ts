@@ -51,6 +51,11 @@ export class PredicaoComponent implements OnInit {
   displayedColumns: string[] = ["item", "cost"];
   transactions: Transaction[] = [];
 
+  totalAr: number = 0;
+  totalPc: number = 0;
+  totalLa: number = 0;
+  totalPr: number = 0;
+
   pieChartOptions = {
     chart: {
       renderTo: "container",
@@ -90,15 +95,15 @@ export class PredicaoComponent implements OnInit {
         type: "pie",
         name: "",
         data: [
-          ["Lâmpadas", 45.0],
-          ["Projetores", 26.8],
+          ["Lâmpadas", this.totalLa],
+          ["Projetores", this.totalPr],
           {
             name: "Computadores",
-            y: 12.8,
+            y: this.totalPc,
             sliced: true,
             selected: true
           },
-          ["Ár condicionados", 8.5]
+          ["Ár condicionados", this.totalAr]
         ]
       }
     ]
@@ -348,34 +353,99 @@ export class PredicaoComponent implements OnInit {
           }
         }
       });
+      var tempTotal = min / 60;
+
+      //total
+      var kwTotal = (totalPc + totalAr + totalLa + totalPr) / 1000;
+      var energiaTotal = kwTotal * tempTotal;
+      var valorTotal = 0.3 * energiaTotal;
+
+      // por equipamento
+      var kwPc = totalPc / 1000;
+      var energiaPc = kwPc * tempTotal;
+      var valorPc = 0.3 * energiaPc;
+
+      var kwPr = totalPr / 1000;
+      var energiaPr = kwPr * tempTotal;
+      var valorPr = 0.3 * energiaPr;
+
+      var kwLa = totalLa / 1000;
+      var energiaLa = kwLa * tempTotal;
+      var valorLa = 0.3 * energiaLa;
+
+      var kwAr = totalAr / 1000;
+      var energiaAr = kwAr * tempTotal;
+      var valorAr = 0.3 * energiaAr;
+
+      console.log(valorAr);
+      console.log(valorPc);
+      console.log(valorPr);
+      console.log(valorLa);
+
+      this.totalAr = valorAr;
+      this.totalPc = valorPc;
+      this.totalPr = valorPr;
+      this.totalLa = valorLa;
+
+      this.grafico1();
     });
-    var tempTotal = min / 60;
-
-    //total
-    var kwTotal = (totalPc + totalAr + totalLa + totalPr) / 1000;
-    var energiaTotal = kwTotal * tempTotal;
-    var valorTotal = 0.3 * energiaTotal;
-
-    // por equipamento
-    var kwPc = totalPc / 1000;
-    var energiaPc = kwPc * tempTotal;
-    var valorPc = 0.3 * energiaPc;
-
-    var kwPr = totalPr / 1000;
-    var energiaPr = kwPr * tempTotal;
-    var valorPr = 0.3 * energiaPr;
-
-    var kwLa = totalLa / 1000;
-    var energiaLa = kwLa * tempTotal;
-    var valorLa = 0.3 * energiaLa;
-
-    var kwAr = totalAr / 1000;
-    var energiaAr = kwAr * tempTotal;
-    var valorLa = 0.3 * energiaAr;
-
-    console.log(min);
   }
-
+  grafico1() {
+    this.pieChartOptions = {
+      chart: {
+        renderTo: "container",
+        plotBackgroundColor: null,
+        plotBorderWidth: null,
+        plotShadow: false
+      },
+      credits: {
+        enabled: false
+      },
+      title: {
+        text: "Gasto por equipamento"
+      },
+      subtitle: {
+        text: "Resultado da predição"
+      },
+      tooltip: {
+        pointFormat: "<b>{point.percentage}%</b>",
+        percentageDecimals: 1
+      },
+      plotOptions: {
+        pie: {
+          allowPointSelect: true,
+          cursor: "pointer",
+          dataLabels: {
+            enabled: true,
+            color: "#000000",
+            connectorColor: "#000000",
+            formatter: function () {
+              return (
+                "<b>" + this.point.name + "</b>: " + this.percentage + " %"
+              );
+            }
+          }
+        }
+      },
+      series: [
+        {
+          type: "pie",
+          name: "",
+          data: [
+            ["Lâmpadas", this.totalLa],
+            ["Projetores", this.totalPr],
+            {
+              name: "Computadores",
+              y: this.totalPc,
+              sliced: true,
+              selected: true
+            },
+            ["Ár condicionados", this.totalAr]
+          ]
+        }
+      ]
+    };
+  }
   chartOptions = [
     { chartConfig: this.pieChartOptions },
     { chartConfig: this.barLineChartOptions }
