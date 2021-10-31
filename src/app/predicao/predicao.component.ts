@@ -56,6 +56,10 @@ export class PredicaoComponent implements OnInit {
   totalLa: number = 0;
   totalPr: number = 0;
 
+  total: number = 0;
+
+  updateFlag = false;
+
   pieChartOptions = {
     chart: {
       renderTo: "container",
@@ -73,7 +77,7 @@ export class PredicaoComponent implements OnInit {
       text: "Resultado da predição"
     },
     tooltip: {
-      pointFormat: "<b>{point.percentage}%</b>",
+      pointFormat: "<b>R${point.y}</b>",
       percentageDecimals: 1
     },
     plotOptions: {
@@ -85,7 +89,13 @@ export class PredicaoComponent implements OnInit {
           color: "#000000",
           connectorColor: "#000000",
           formatter: function () {
-            return "<b>" + this.point.name + "</b>: " + this.percentage + " %";
+            return (
+              "<b>" +
+              this.point.name +
+              "</b>: " +
+              this.percentage.toFixed(1) +
+              " %"
+            );
           }
         }
       }
@@ -260,7 +270,8 @@ export class PredicaoComponent implements OnInit {
   getTotalCost() {
     return this.transactions
       .map((t) => t.cost)
-      .reduce((acc, value) => acc + value, 0);
+      .reduce((acc, value) => acc + value, 0)
+      .toFixed(2);
   }
   constructor(
     public dialog: MatDialog,
@@ -299,16 +310,12 @@ export class PredicaoComponent implements OnInit {
   ngOnInit(): void {}
 
   executarPredicao() {
-    console.log(this.name);
-
     var dataInicio = this.campaignOne.value.start.toLocaleDateString("pt-BR", {
       timeZone: "UTC"
     });
     var dataFim = this.campaignOne.value.end.toLocaleDateString("pt-BR", {
       timeZone: "UTC"
     });
-    console.log(dataInicio);
-    console.log(dataFim);
 
     this.transactions = [{ item: dataInicio + " -> " + dataFim, cost: 50 }];
     var dateInicio = Math.floor(
@@ -331,8 +338,6 @@ export class PredicaoComponent implements OnInit {
     var kw = 100 / 1000;
     var energia = kw * temp;
     var valor = 0.3 * energia;
-
-    this.transactions = [{ item: dataInicio + " -> " + dataFim, cost: valor }];
 
     var totalPc = 0;
     var totalAr = 0;
@@ -359,7 +364,6 @@ export class PredicaoComponent implements OnInit {
       var kwTotal = (totalPc + totalAr + totalLa + totalPr) / 1000;
       var energiaTotal = kwTotal * tempTotal;
       var valorTotal = 0.3 * energiaTotal;
-
       // por equipamento
       var kwPc = totalPc / 1000;
       var energiaPc = kwPc * tempTotal;
@@ -377,74 +381,40 @@ export class PredicaoComponent implements OnInit {
       var energiaAr = kwAr * tempTotal;
       var valorAr = 0.3 * energiaAr;
 
-      console.log(valorAr);
-      console.log(valorPc);
-      console.log(valorPr);
-      console.log(valorLa);
+      this.totalAr = Number(valorAr.toFixed(2));
+      this.totalPc = Number(valorPc.toFixed(2));
+      this.totalPr = Number(valorPr.toFixed(2));
+      this.totalLa = Number(valorLa.toFixed(2));
 
-      this.totalAr = valorAr;
-      this.totalPc = valorPc;
-      this.totalPr = valorPr;
-      this.totalLa = valorLa;
+      this.total = Number(valorTotal.toFixed(2));
+
+      this.transactions = [
+        { item: "Computador", cost: this.totalPc },
+        { item: "Ár condicionado", cost: this.totalAr },
+        { item: "Projetor", cost: this.totalPr },
+        { item: "Lâmpadas", cost: this.totalLa }
+      ];
 
       this.grafico1();
     });
   }
   grafico1() {
-    this.pieChartOptions = {
-      chart: {
-        renderTo: "container",
-        plotBackgroundColor: null,
-        plotBorderWidth: null,
-        plotShadow: false
-      },
-      credits: {
-        enabled: false
-      },
-      title: {
-        text: "Gasto por equipamento"
-      },
-      subtitle: {
-        text: "Resultado da predição"
-      },
-      tooltip: {
-        pointFormat: "<b>{point.percentage}%</b>",
-        percentageDecimals: 1
-      },
-      plotOptions: {
-        pie: {
-          allowPointSelect: true,
-          cursor: "pointer",
-          dataLabels: {
-            enabled: true,
-            color: "#000000",
-            connectorColor: "#000000",
-            formatter: function () {
-              return (
-                "<b>" + this.point.name + "</b>: " + this.percentage + " %"
-              );
-            }
-          }
-        }
-      },
-      series: [
+    this.chartOptions[0].chartConfig.series[0] = {
+      type: "pie",
+      name: "",
+      data: [
+        ["Lâmpadas", this.totalLa],
+        ["Projetores", this.totalPr],
         {
-          type: "pie",
-          name: "",
-          data: [
-            ["Lâmpadas", this.totalLa],
-            ["Projetores", this.totalPr],
-            {
-              name: "Computadores",
-              y: this.totalPc,
-              sliced: true,
-              selected: true
-            },
-            ["Ár condicionados", this.totalAr]
-          ]
-        }
+          name: "Computadores",
+          y: this.totalPc,
+          sliced: true,
+          selected: true
+        },
+        ["Ár condicionados", this.totalAr]
       ]
     };
+    this.updateFlag = true;
   }
   chartOptions = [
     { chartConfig: this.pieChartOptions },
