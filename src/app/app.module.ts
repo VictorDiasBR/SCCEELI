@@ -18,6 +18,7 @@ import { MatTableModule } from "@angular/material/table";
 import { HighchartsChartModule } from "highcharts-angular";
 import { NgxGaugeModule } from "ngx-gauge";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { MatStepperModule } from "@angular/material/stepper";
 
 import { AppComponent } from "./app.component";
 import { AppRoutingModule } from "./app-routing.module";
@@ -28,11 +29,11 @@ import { Grafico2Component } from "./dashboard/grafico2/grafico2.component";
 import { PredicaoComponent } from "./predicao/predicao.component";
 import { LaboratorioComponent } from "./laboratorio/laboratorio.component";
 import { EquipamentoComponent } from "./equipamento/equipamento.component";
-import { GastosComponent } from './gastos/gastos.component';
-import { MetasComponent } from './metas/metas.component';
-import { HistoricoComponent } from './historico/historico.component';
-import { DispositivosComponent } from './dispositivos/dispositivos.component';
-import { RelatorioComponent } from './relatorio/relatorio.component';
+import { GastosComponent } from "./gastos/gastos.component";
+import { MetasComponent } from "./metas/metas.component";
+import { HistoricoComponent } from "./historico/historico.component";
+import { DispositivosComponent } from "./dispositivos/dispositivos.component";
+import { RelatorioComponent } from "./relatorio/relatorio.component";
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { RelatorioComponent } from './relatorio/relatorio.component';
     RelatorioComponent
   ],
   imports: [
+    MatStepperModule,
     FormsModule,
     ReactiveFormsModule,
     MatTableModule,

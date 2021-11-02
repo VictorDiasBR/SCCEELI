@@ -1,5 +1,10 @@
 import { Component, Inject, OnInit } from "@angular/core";
-import { FormGroup, FormControl } from "@angular/forms";
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormControl
+} from "@angular/forms";
 import {
   MatDialog,
   MatDialogRef,
@@ -14,7 +19,8 @@ import {
   Regra,
   Simulacao,
   Log,
-  ConsumoConverter
+  ConsumoConverter,
+  Predicao
 } from "../service/lab";
 import { Observable } from "rxjs";
 declare var require: any;
@@ -38,16 +44,14 @@ interface Transaction {
 })
 export class PredicaoComponent implements OnInit {
   campaignOne: FormGroup;
-  campaignTwo: FormGroup;
+
+  name: FormGroup;
 
   animal: string;
-  name: string;
 
   Highcharts = Highcharts;
 
   labs: Observable<any>;
-  simulacoes: Observable<any>;
-
   displayedColumns: string[] = ["item", "cost"];
   transactions: Transaction[] = [];
 
@@ -150,55 +154,6 @@ export class PredicaoComponent implements OnInit {
         crosshair: true
       }
     ],
-    yAxis: [
-      {
-        // Primary yAxis
-        labels: {
-          format: "{value}",
-          style: {
-            color: "#7cb5ec"
-          }
-        },
-        title: {
-          text: "Unidade de Medida 1",
-          style: {
-            color: "#7cb5ec"
-          }
-        }
-      },
-      {
-        // Secondary yAxis
-        title: {
-          text: "Unidade de Medida 2",
-          style: {
-            color: "#0d233a"
-          }
-        },
-        labels: {
-          format: "{value}",
-          style: {
-            color: "#0d233a"
-          }
-        },
-        opposite: true
-      },
-      {
-        // Secondary yAxis
-        title: {
-          text: "Unidade de Medida 3",
-          style: {
-            color: "#8bbc21"
-          }
-        },
-        labels: {
-          format: "{value}",
-          style: {
-            color: "#8bbc21"
-          }
-        },
-        opposite: true
-      }
-    ],
     tooltip: {
       shared: true
     },
@@ -207,7 +162,7 @@ export class PredicaoComponent implements OnInit {
         name: "Série 1",
         type: "column",
         color: "#7cb5ec",
-        yAxis: 0,
+
         data: [
           49.9,
           71.5,
@@ -225,43 +180,15 @@ export class PredicaoComponent implements OnInit {
         name: "Série 2",
         type: "spline",
         color: "#0d233a",
-        yAxis: 1,
-        data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3]
+
+        data: [70.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3]
       },
       {
         name: "Série 3",
         type: "spline",
         color: "#8bbc21",
-        yAxis: 2,
+
         data: [4.0, 3.9, 6.5, 11.5, 15.2, 18.5, 22, 23.5, 20.3, 12.3]
-      },
-      {
-        //Sinalizadores
-        type: "flags",
-        shape: "flag",
-        color: "rgba(0, 0, 0, 0.50)",
-        fillColor: "rgba(255, 255, 255, 0.20)",
-        border: "0px",
-        style: {
-          color: "gray",
-          fontFamily: "Verdana, sans-serif",
-          fontSize: "9px"
-        },
-        states: {
-          hover: {
-            fillColor: "rgb(255, 255, 255)"
-          }
-        },
-        tooltip: {
-          followPointer: true
-        },
-        name: "Sinalizador",
-        zIndex: 2,
-        y: -245,
-        data: [
-          { x: 1, title: "Sinalizador 1", text: "Sinalizador 1" },
-          { x: 6, title: "Sinalizador 2", text: "Sinalizador 2" }
-        ]
       }
     ]
   };
@@ -276,7 +203,8 @@ export class PredicaoComponent implements OnInit {
   constructor(
     public dialog: MatDialog,
     private labService: LabService,
-    private labDataService: LabDataService
+    private labDataService: LabDataService,
+    private _formBuilder: FormBuilder
   ) {
     const today = new Date();
     const month = today.getMonth();
@@ -284,22 +212,16 @@ export class PredicaoComponent implements OnInit {
 
     this.labs = this.labService.getAll();
 
-    this.simulacoes = this.labService.getAll();
-
-    this.campaignOne = new FormGroup({
+    this.campaignOne = this._formBuilder.group({
       start: new FormControl(new Date(year, month, 13)),
-      end: new FormControl(new Date(year, month, 16))
-    });
-
-    this.campaignTwo = new FormGroup({
-      start: new FormControl(new Date(year, month, 15)),
-      end: new FormControl(new Date(year, month, 19))
+      end: new FormControl(new Date(year, month, 16)),
+      titulo: ""
     });
   }
   openDialog(): void {
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
       width: "250px",
-      data: { name: this.name, animal: this.animal }
+      data: { name: this.campaignOne.value.titulo, animal: this.animal }
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -394,6 +316,19 @@ export class PredicaoComponent implements OnInit {
         { item: "Projetor", cost: this.totalPr },
         { item: "Lâmpadas", cost: this.totalLa }
       ];
+
+      var predicao: Predicao = {
+        titulo: this.campaignOne.value.titulo,
+        periodo: dataInicio + " | " + dataFim,
+        totalPeriodo: this.total,
+        totalPc: this.totalPc,
+        totalAr: this.totalAr,
+        totalLam: this.totalLa,
+        totalPro: this.totalPr,
+        dataPredicao: new Date().toLocaleString()
+      };
+
+      this.labService.insertPredicao(predicao);
 
       this.grafico1();
     });

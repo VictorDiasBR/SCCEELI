@@ -2,9 +2,18 @@
   <mat-grid-tile>
     <mat-card>
       <form class="example-form">
-        <mat-form-field class="example-full-width" appearance="fill">
-          <mat-label>Título da predição</mat-label>
-          <input matInput placeholder="Ex. Pizza" value="{{name}}" />
+        <mat-form-field
+          class="example-form-field"
+          appearance="fill"
+          [formGroup]="campaignOne"
+        >
+          <mat-label>Descrição</mat-label>
+          <input
+            matInput
+            formControlName="titulo"
+            placeholder="obs..."
+            required
+          />
         </mat-form-field>
 
         <mat-form-field class="example-form-field" appearance="fill">
@@ -12,8 +21,8 @@
           <mat-date-range-input
             [formGroup]="campaignOne"
             [rangePicker]="campaignOnePicker"
-            [comparisonStart]="campaignTwo.value.start"
-            [comparisonEnd]="campaignTwo.value.end"
+            [comparisonStart]="campaignOne.value.start"
+            [comparisonEnd]="campaignOne.value.end"
           >
             <input
               matStartDate

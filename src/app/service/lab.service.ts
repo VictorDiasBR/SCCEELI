@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Lab, Equip, Regra, Simulacao, Log } from "./lab";
+import { Lab, Equip, Regra, Simulacao, Log, Meta, Predicao } from "./lab";
 import { AngularFireDatabase } from "@angular/fire/database";
 
 import { map } from "rxjs/operators";
@@ -125,5 +125,75 @@ export class LabService {
 
   deleteSimulacao(key: string) {
     this.db.object("simulacoes/" + key).remove();
+  }
+
+  insertMeta(meta: Meta) {
+    this.db
+      .list("metas")
+      .push(meta)
+      .then((result: any) => {
+        console.log(result.key);
+      });
+  }
+  updateMeta(regra: Meta, key: string) {
+    this.db
+      .list("metas")
+      .update(key, regra)
+      .catch((error: any) => {
+        console.error(error);
+      });
+  }
+
+  getAllMetas() {
+    return this.db
+      .list("metas")
+      .snapshotChanges()
+      .pipe(
+        map((changes) => {
+          return changes.map((c) => ({
+            key: c.payload.key,
+            ...(c.payload.val() as {})
+          }));
+        })
+      );
+  }
+
+  deleteMeta(key: string) {
+    this.db.object("metas/" + key).remove();
+  }
+
+  insertPredicao(predicao: Predicao) {
+    this.db
+      .list("predicoes")
+      .push(predicao)
+      .then((result: any) => {
+        console.log(result.key);
+      });
+  }
+  updatePredicao(predicao: Predicao, key: string) {
+    this.db
+      .list("predicoes")
+      .update(key, predicao)
+      .catch((error: any) => {
+        console.error(error);
+      });
+  }
+
+  getAllPredicoes() {
+    return this.db
+      .list("predicoes")
+      .snapshotChanges()
+      .pipe(
+        map((changes) => {
+          return changes.map((c) => ({
+            key: c.payload.key,
+            ...(c.payload.val() as {})
+          }));
+        })
+      );
+  }
+
+  deletePredicao(key: string) {
+    this.db.object("predicoes/" + key).remove();
   }
 }

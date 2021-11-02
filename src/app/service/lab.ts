@@ -39,6 +39,26 @@ export class Simulacao {
   periodo?: string;
 }
 
+export class Meta {
+  tipo: string;
+  tipoEquip: string;
+  periodo: string;
+  gastoMin: number;
+  gastoMax: number;
+  descricao: string;
+}
+
+export class Predicao {
+  titulo: string;
+  periodo: string;
+  totalPeriodo: number;
+  totalPc: number;
+  totalAr: number;
+  totalLam: number;
+  totalPro: number;
+  dataPredicao: string;
+}
+
 export class ConsumoConverter {
   labKey: string;
   valor: number;
