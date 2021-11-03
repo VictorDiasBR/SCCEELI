@@ -37,6 +37,14 @@ interface Transaction {
   item: string;
   cost: number;
 }
+
+interface Serie {
+  name: string;
+  type: string;
+  color: string;
+  data: number[];
+}
+
 @Component({
   selector: "app-predicao",
   templateUrl: "./predicao.component.html",
@@ -52,6 +60,8 @@ export class PredicaoComponent implements OnInit {
   Highcharts = Highcharts;
 
   labs: Observable<any>;
+  metas: Observable<any>;
+
   displayedColumns: string[] = ["item", "cost"];
   transactions: Transaction[] = [];
 
@@ -61,8 +71,14 @@ export class PredicaoComponent implements OnInit {
   totalPr: number = 0;
 
   total: number = 0;
+  descricao: string = "";
+  min: number = 0;
+  max: number = 0;
+
+  serie: Serie[] = [];
 
   updateFlag = false;
+  updateFlag2 = false;
 
   pieChartOptions = {
     chart: {
@@ -132,25 +148,14 @@ export class PredicaoComponent implements OnInit {
       enabled: false
     },
     title: {
-      text: "Título Bar + Line"
+      text: "Predição x Metas"
     },
     subtitle: {
-      text: "Subtítulo Bar + Line"
+      text: "Meta para Computadores"
     },
     xAxis: [
       {
-        categories: [
-          "x1",
-          "x2",
-          "x3",
-          "x4",
-          "x5",
-          "x6",
-          "x7",
-          "x8",
-          "x9",
-          "x10"
-        ],
+        categories: ["Computador", "Ar condicionado", "Lâmpada", "Projetor"],
         crosshair: true
       }
     ],
@@ -159,36 +164,22 @@ export class PredicaoComponent implements OnInit {
     },
     series: [
       {
-        name: "Série 1",
+        name: "Equipamentos",
         type: "column",
         color: "#7cb5ec",
-
-        data: [
-          49.9,
-          71.5,
-          106.4,
-          129.2,
-          144.0,
-          176.0,
-          135.6,
-          148.5,
-          210.4,
-          194.1
-        ]
+        data: [0, 0, 0, 0]
       },
       {
-        name: "Série 2",
+        name: "meta",
         type: "spline",
-        color: "#0d233a",
-
-        data: [70.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3]
+        color: "#7cb5ec",
+        data: [0, 0, 0, 0]
       },
       {
-        name: "Série 3",
+        name: "meta",
         type: "spline",
-        color: "#8bbc21",
-
-        data: [4.0, 3.9, 6.5, 11.5, 15.2, 18.5, 22, 23.5, 20.3, 12.3]
+        color: "#7cb5ec",
+        data: [0, 0, 0, 0]
       }
     ]
   };
@@ -211,6 +202,7 @@ export class PredicaoComponent implements OnInit {
     const year = today.getFullYear();
 
     this.labs = this.labService.getAll();
+    this.metas = this.labService.getAllMetas();
 
     this.campaignOne = this._formBuilder.group({
       start: new FormControl(new Date(year, month, 13)),
@@ -327,12 +319,118 @@ export class PredicaoComponent implements OnInit {
         totalPro: this.totalPr,
         dataPredicao: new Date().toLocaleString()
       };
-
-      this.labService.insertPredicao(predicao);
-
       this.grafico1();
+      this.labService.insertPredicao(predicao);
+    });
+
+    var serieLista: Serie[] = [];
+    var serieLinhaMin: Serie;
+    var serieLinhaMax: Serie;
+
+    var descricao: string = "";
+    this.metas.forEach((element) => {
+      element.forEach((meta) => {
+        if (meta.tipoEquip === "Computador") {
+          serieLinhaMin = {
+            name: "Meta: " + meta.descricao + " - Gasto Mínimo",
+            type: "spline",
+            color: "#00FF00",
+            data: [Number(meta.gastoMin), 0, 0, 0]
+          };
+          serieLinhaMax = {
+            name: "Meta: " + meta.descricao + " - Gasto Máximo",
+            type: "spline",
+            color: "#FF0000",
+            data: [Number(meta.gastoMax), 0, 0, 0]
+          };
+        } else if (meta.tipoEquip === "Ar condicionado") {
+          serieLinhaMin = {
+            name: "Meta: " + meta.descricao + " - Gasto Mínimo",
+            type: "spline",
+            color: "#00FF00",
+            data: [0, Number(meta.gastoMin), 0, 0]
+          };
+          serieLinhaMax = {
+            name: "Meta: " + meta.descricao + " - Gasto Máximo",
+            type: "spline",
+            color: "#FF0000",
+            data: [0, Number(meta.gastoMax), 0, 0]
+          };
+        } else if (meta.tipoEquip === "Lâmpada") {
+          serieLinhaMin = {
+            name: "Meta: " + meta.descricao + " - Gasto Mínimo",
+            type: "spline",
+            color: "#00FF00",
+            data: [0, 0, Number(meta.gastoMin), 0]
+          };
+          serieLinhaMax = {
+            name: "Meta: " + meta.descricao + " - Gasto Máximo",
+            type: "spline",
+            color: "#FF0000",
+            data: [0, 0, Number(meta.gastoMax), 0]
+          };
+        } else if (meta.tipoEquip === "Projetor") {
+          serieLinhaMin = {
+            name: "Meta: " + meta.descricao + " - Gasto Mínimo",
+            type: "spline",
+            color: "#00FF00",
+            data: [0, 0, 0, Number(meta.gastoMin)]
+          };
+          serieLinhaMax = {
+            name: "Meta: " + meta.descricao + " - Gasto Máximo",
+            type: "spline",
+            color: "#FF0000",
+            data: [0, 0, 0, Number(meta.gastoMax)]
+          };
+        } else if (meta.tipoEquip === "Todos os Equipamentos") {
+          serieLinhaMin = {
+            name: "Meta: " + meta.descricao + " - Gasto Mínimo",
+            type: "spline",
+            color: "#00FF00",
+            data: [
+              Number(meta.gastoMin),
+              Number(meta.gastoMin),
+              Number(meta.gastoMin),
+              Number(meta.gastoMin)
+            ]
+          };
+          serieLinhaMax = {
+            name: "Meta: " + meta.descricao + " - Gasto Máximo",
+            type: "spline",
+            color: "#FF0000",
+            data: [
+              Number(meta.gastoMax),
+              Number(meta.gastoMax),
+              Number(meta.gastoMax),
+              Number(meta.gastoMax)
+            ]
+          };
+        }
+        if (
+          meta.tipoEquip === "Computador" ||
+          meta.tipoEquip === "Ar condicionado" ||
+          meta.tipoEquip === "Lâmpada" ||
+          meta.tipoEquip === "Projetor" ||
+          meta.tipoEquip === "Todos os Equipamentos"
+        ) {
+          var serieBarra: Serie = {
+            name: "Equipamentos",
+            type: "column",
+            color: "#7cb5ec",
+            data: [this.totalPc, this.totalAr, this.totalLa, this.totalPr]
+          };
+          this.grafico2([serieBarra, serieLinhaMin, serieLinhaMax]);
+        }
+      });
     });
   }
+
+  grafico2(lista: Serie[]) {
+    this.chartOptions[1].chartConfig.series = lista;
+
+    this.updateFlag2 = true;
+  }
+
   grafico1() {
     this.chartOptions[0].chartConfig.series[0] = {
       type: "pie",

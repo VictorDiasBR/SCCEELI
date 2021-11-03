@@ -43,8 +43,8 @@ export class Meta {
   tipo: string;
   tipoEquip: string;
   periodo: string;
-  gastoMin: number;
-  gastoMax: number;
+  gastoMin: string;
+  gastoMax: string;
   descricao: string;
 }
 
