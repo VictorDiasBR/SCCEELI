@@ -32,6 +32,9 @@
           <mat-option value="Todos os laboratórios"
             >Todos os Laboratórios</mat-option
           >
+          <mat-option value="Todos os equipamentos"
+          >Todos os equipamentos</mat-option
+        >
           <mat-option *ngFor="let lab of labs | async" [value]="lab.nome"
             >{{lab.nome}}</mat-option
           >

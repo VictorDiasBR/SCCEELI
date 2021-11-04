@@ -151,7 +151,7 @@ export class PredicaoComponent implements OnInit {
       text: "Predição x Metas"
     },
     subtitle: {
-      text: "Meta para Computadores"
+      text: "Meta para equipamentos"
     },
     xAxis: [
       {
@@ -328,7 +328,15 @@ export class PredicaoComponent implements OnInit {
     var serieLinhaMax: Serie;
 
     var descricao: string = "";
+
     this.metas.forEach((element) => {
+      var serieBarra: Serie = {
+        name: "Equipamentos",
+        type: "column",
+        color: "#7cb5ec",
+        data: [this.totalPc, this.totalAr, this.totalLa, this.totalPr]
+      };
+      serieLista.push(serieBarra);
       element.forEach((meta) => {
         if (meta.tipoEquip === "Computador") {
           serieLinhaMin = {
@@ -382,7 +390,7 @@ export class PredicaoComponent implements OnInit {
             color: "#FF0000",
             data: [0, 0, 0, Number(meta.gastoMax)]
           };
-        } else if (meta.tipoEquip === "Todos os Equipamentos") {
+        } else if (meta.tipoEquip === "Todos os equipamentos") {
           serieLinhaMin = {
             name: "Meta: " + meta.descricao + " - Gasto Mínimo",
             type: "spline",
@@ -411,23 +419,20 @@ export class PredicaoComponent implements OnInit {
           meta.tipoEquip === "Ar condicionado" ||
           meta.tipoEquip === "Lâmpada" ||
           meta.tipoEquip === "Projetor" ||
-          meta.tipoEquip === "Todos os Equipamentos"
+          meta.tipoEquip === "Todos os equipamentos"
         ) {
-          var serieBarra: Serie = {
-            name: "Equipamentos",
-            type: "column",
-            color: "#7cb5ec",
-            data: [this.totalPc, this.totalAr, this.totalLa, this.totalPr]
-          };
-          this.grafico2([serieBarra, serieLinhaMin, serieLinhaMax]);
+          serieLista.push(serieLinhaMin);
+          serieLista.push(serieLinhaMax);
         }
       });
+
+      this.grafico2(serieLista);
     });
   }
 
   grafico2(lista: Serie[]) {
     this.chartOptions[1].chartConfig.series = lista;
-
+    console.log(lista);
     this.updateFlag2 = true;
   }
 
