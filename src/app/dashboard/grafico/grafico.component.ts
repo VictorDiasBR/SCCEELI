@@ -155,6 +155,7 @@ export class GraficoComponent implements OnInit {
                 e.equip.equip.nome === "computador"
               ) {
                 var temp = e.min / 60;
+                console.log(temp);
                 var kw = e.equip.equip.potencia / 1000;
                 var energia = kw * temp;
                 var valor = this.bandeira * energia;
@@ -175,6 +176,7 @@ export class GraficoComponent implements OnInit {
                 e.equip.equip.nome === "projetor"
               ) {
                 var temp3 = e.min / 60;
+
                 var kw3 = e.equip.equip.potencia / 1000;
                 var energia3 = kw3 * temp3;
                 var valor3 = this.bandeira * energia3;
